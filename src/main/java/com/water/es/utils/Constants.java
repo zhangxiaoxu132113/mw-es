@@ -1,6 +1,7 @@
 package com.water.es.utils;
 
 /**
+ *
  * Created by zhangmiaojie on 2017/3/2.
  */
 public final class Constants {

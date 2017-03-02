@@ -18,5 +18,5 @@
     <mvc:annotation-driven/>
 
     <!-- 文件引用导入 -->
-    <import resource="spring-es.xml"/>
+    <!--<import resource="spring-es.xml"/>-->
 </beans>

@@ -8,8 +8,10 @@
         http://www.springframework.org/schema/data/elasticsearch/spring-elasticsearch-1.0.xsd">
 
 
-    <elasticsearch:transport-client id="client" cluster-name="@elasticsearch.cluster.name@"
-                                    cluster-nodes="@elasticsearch.node01@" />
+    <elasticsearch:transport-client id="client" cluster-name="@elasticsearch.cluster.name@11111"
+                                    cluster-nodes="@elasticsearch.node01@"/>
+    <!--<elasticsearch:node-client id="client" local="true"/>-->
+
 
     <bean name="elasticsearchTemplate" class="com.water.es.utils.ElesticsearchExtTemplate">
         <constructor-arg name="client" ref="client"/>
