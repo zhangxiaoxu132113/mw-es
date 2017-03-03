@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/es.iml" filepath="$PROJECT_DIR$/es.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mw-es.iml" filepath="$PROJECT_DIR$/mw-es.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mw-es-api/mw-es-api.iml" filepath="$PROJECT_DIR$/mw-es-api/mw-es-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mw-es-service/mw-es-service.iml" filepath="$PROJECT_DIR$/mw-es-service/mw-es-service.iml" />
     </modules>
   </component>
 </project>

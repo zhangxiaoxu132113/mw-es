@@ -22,8 +22,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="es" />
+        <module name="mw-es-api" />
+        <module name="mw-es-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="mw-es-api" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
