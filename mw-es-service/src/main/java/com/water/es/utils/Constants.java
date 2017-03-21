@@ -20,6 +20,7 @@ public final class Constants {
     }
 
     public static class Analyzer {
+        public static final String IK_SMART = "ik_smart";
         public static final String IK_MAX_WORD = "ik_max_word";
     }
 }

@@ -11,9 +11,9 @@
     <dubbo:registry protocol="zookeeper" address="@zookeeper.address@" check="false"/>
 
     <dubbo:protocol name="dubbo" port="20880"/>
-
+    <!--extension="com.alibaba.dubbo.rpc.protocol.rest.support.LoggingFilter"-->
     <dubbo:protocol name="rest" port="8888" threads="500" contextpath="services" server="tomcat" accepts="500"
-                    extension="com.alibaba.dubbo.rpc.protocol.rest.support.LoggingFilter"/>
+                    />
 
     <dubbo:service interface="com.water.es.api.Service.IArticleService" ref="esArticleService" protocol="dubbo"/>
 </beans>

@@ -1,29 +1,42 @@
 package com.water.es.entry;
 
+import com.water.es.annotation.EsMapping;
+import com.water.es.utils.Constants;
+
 import java.io.Serializable;
 
 public class ITArticle implements Serializable {
-
+    @EsMapping(isAnalyzer = false)
     private String id;
 
+    @EsMapping(isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String title;
 
+    @EsMapping(isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String description;
 
+    @EsMapping(isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String author;
 
-    private String category;
-
-    private String reference;
-
-    private String descryptUrl;
-
-    private String releaseTime;
-
-    private Long createOn;
-
+    @EsMapping(isStore = false, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String content;
 
+    @EsMapping(isAnalyzer = false)
+    private String category;
+
+    @EsMapping(isAnalyzer = false)
+    private String reference;
+
+    @EsMapping(isAnalyzer = false)
+    private String descryptUrl;
+
+    @EsMapping(isAnalyzer = false)
+    private String releaseTime;
+
+    @EsMapping(isAnalyzer = false)
+    private Long createOn;
+
+    @EsMapping(isMapping = false)
     private static final long serialVersionUID = 1L;
 
     public String getId() {

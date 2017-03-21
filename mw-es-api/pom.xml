@@ -13,7 +13,7 @@
     <properties>
         <jdk.version>1.8</jdk.version>
         <encoding.version>UTF-8</encoding.version>
-        <dubbo.version>2.8.4</dubbo.version>
+        <dubbo.version>2.4.4</dubbo.version>
     </properties>
 
     <dependencies>
@@ -25,7 +25,7 @@
     </dependencies>
 
     <build>
-        <finalName>keyword</finalName>
+        <finalName>mw-es-api</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

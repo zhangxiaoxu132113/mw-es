@@ -14,5 +14,6 @@
     <file url="file://$PROJECT_DIR$/mw-es-service/src/main/java/com/water/es/entry/ITArticle.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mw-es-service/src/main/java/com/water/es/entry/ITArticleCriteria.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mw-es-service/src/main/java/com/water/es/utils/ElasticSearchTemplate.java" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
