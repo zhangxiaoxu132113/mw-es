@@ -296,8 +296,6 @@ public class ElasticSearchTemplate {
                 SearchHit hit = hits[i];
                 // 将文档中的每一个对象转换json串值
                 String json = hit.getSourceAsString();
-//                System.out.println(json);
-
                 Map<String, HighlightField> result = hit.highlightFields();
                 //从设定的高亮域中取得指定域
                 HighlightField titleField = result.get("title");
@@ -334,9 +332,34 @@ public class ElasticSearchTemplate {
     }
 
     public static void main(String[] args) {
-        ElasticSearchTemplate util = new ElasticSearchTemplate();
-        util.searchArticleByHighLight("java");
-
+//        ElasticSearchTemplate util = new ElasticSearchTemplate();
+//        util.searchArticleByHighLight("angularjs路由");
 //        util.createIndex("blog","article",ITArticle.class);
+
+
+        int total = 2015;
+        int currentPage =10;
+        int pageSize = 10;
+        int pageTotal = total / pageSize;
+        int firstPage = 1;
+        int lastPage = pageSize > pageTotal ? pageTotal : pageSize;
+        if (currentPage <= 0) {
+            throw new RuntimeException("当前页不能小于等于0");
+        }
+        if (currentPage - 7 >= 0) {
+            firstPage = (currentPage - 7) + 2;
+            lastPage = (currentPage - 6) + lastPage;
+        }
+
+        System.out.println("当前页一共" + pageTotal +"页");
+        if (currentPage > 1) {
+            System.out.print("上一页");
+        }
+        for (int i=firstPage;i<=lastPage;i++) {
+            System.out.print("\t"+i);
+        }
+        if (lastPage<pageTotal) {
+            System.out.print("下一页");
+        }
     }
 }
