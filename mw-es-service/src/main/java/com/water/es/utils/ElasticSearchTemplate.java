@@ -2,6 +2,7 @@ package com.water.es.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.water.es.annotation.EsMapping;
+import com.water.es.entry.ESDocument;
 import com.water.es.entry.ITArticle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -195,7 +196,8 @@ public class ElasticSearchTemplate {
      * 如果查询一个（ not_analyzed ）未分析的精确值字符串字段， 它们会将整个查询字符串作为单个词项对待。
      * 但如果要查询一个（ analyzed ）已分析的全文字段， 它们会先将查询字符串传递到一个合适的分析器，然后生成一个供查询的词项列表。
      */
-    public String matchQueryBuilder(String index, String type, String key, String value, int from, int size) {
+    public ESDocument matchQueryBuilder(String index, String type, String key, String value, int from, int size) {
+        ESDocument document = new ESDocument();
         MatchQueryBuilder queryBuilder = QueryBuilders.matchQuery(key, value);
         SearchResponse searchResponse = client.prepareSearch(index)
                 .setTypes(type)
@@ -214,14 +216,20 @@ public class ElasticSearchTemplate {
                 results.add(sources);
             }
         }
-        return JSON.toJSONString(results);
+        long totalHits = searchResponse.getHits().getTotalHits();
+        long took = searchResponse.getTook().millis();
+        document.setTook(took);
+        document.setTotalHits(totalHits);
+        document.setJsonResult(JSON.toJSONString(results));
+        return document;
     }
 
     /**
      * 搜索文档 (精确搜索)
      * 它不会对词的多样性进行处理（如， foo 或 FOO ）
      */
-    public String searchDocumentByTerm(String index, String type, String queryField, String queryValue, int from, int size) {
+    public ESDocument searchDocumentByTerm(String index, String type, String queryField, String queryValue, int from, int size) {
+        ESDocument document = new ESDocument();
         QueryBuilder queryBuilder = new TermQueryBuilder(queryField, queryValue);
         SearchResponse searchResponse = client.prepareSearch(index)
                 .setTypes(type)
@@ -240,7 +248,12 @@ public class ElasticSearchTemplate {
                 results.add(sources);
             }
         }
-        return JSON.toJSONString(results);
+        long totalHits = searchResponse.getHits().getTotalHits();
+        long took = searchResponse.getTook().millis();
+        document.setTook(took);
+        document.setTotalHits(totalHits);
+        document.setJsonResult(JSON.toJSONString(results));
+        return document;
     }
 
     public String searchDocumentShouldMatch(String index, String type, String queryField, String queryValue, int from, int size) {
@@ -267,64 +280,78 @@ public class ElasticSearchTemplate {
         return JSON.toJSONString(results);
     }
 
-    public List<ITArticle> searchArticleByHighLight(String key) {
+    public ESDocument searchArticleByHighLight(String index, String[] types, String[] keys, String value, int from, int size) {
+        ESDocument document = new ESDocument();
         List<ITArticle> articleList = new ArrayList<ITArticle>();
         try {
-
             HighlightBuilder highlightBuilder = new HighlightBuilder();
-            highlightBuilder.field("title");
-            highlightBuilder.field("content");
-            highlightBuilder.preTags("<strong style='color:red;'>");
+            for (String key : keys) {
+                highlightBuilder.field(key);
+            }
+            highlightBuilder.preTags("<strong style='color:#c00;'>");
             highlightBuilder.postTags("</strong>");
-            SearchRequestBuilder searchRequestBuilder = client.prepareSearch("blog")
+            SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index)
                     .highlighter(highlightBuilder);
-            searchRequestBuilder.setTypes("article");
+            for (String type : types) {
+                searchRequestBuilder.setTypes(type);
+            }
             searchRequestBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
 
-            QueryStringQueryBuilder queryBuilder = new QueryStringQueryBuilder(key);
+            QueryStringQueryBuilder queryBuilder = new QueryStringQueryBuilder(value);
             queryBuilder.analyzer("ik_smart");
-            queryBuilder.field("title").field("content");
+            for (String key : keys) {
+                queryBuilder.field(key);
+            }
             searchRequestBuilder.setQuery(queryBuilder);
-            searchRequestBuilder.setFrom(0).setSize(20);
+            searchRequestBuilder.setFrom(from).setSize(size);
             SearchResponse response = searchRequestBuilder.execute()
                     .actionGet();
 
             // 获取搜索的文档结果
             SearchHits searchHits = response.getHits();
             SearchHit[] hits = searchHits.getHits();
+            List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
             for (int i = 0; i < hits.length; i++) {
                 SearchHit hit = hits[i];
                 // 将文档中的每一个对象转换json串值
                 String json = hit.getSourceAsString();
+                Map<String, Object> source = hit.getSource();
                 Map<String, HighlightField> result = hit.highlightFields();
                 //从设定的高亮域中取得指定域
                 HighlightField titleField = result.get("title");
                 //取得定义的高亮标签
                 if (titleField != null) {
-                    Text[] titleTexts =  titleField.fragments();
+                    Text[] titleTexts = titleField.fragments();
                     //为title串值增加自定义的高亮标签
                     String title = "";
-                    for(Text text : titleTexts){
+                    for (Text text : titleTexts) {
                         title += text;
                     }
-                    System.out.println(title);
+                    source.put("title", title);
                 }
-
-
                 HighlightField contentField = result.get("content");
                 //取得定义的高亮标签
                 if (contentField != null) {
-                    Text[] contentTexts =  contentField.fragments();
+                    Text[] contentTexts = contentField.fragments();
                     //为title串值增加自定义的高亮标签
-                    String content = "";
-                    for(Text text : contentTexts){
-                        content += text;
-                    }
-                    System.out.println(content);
-                }
-                System.out.println("__________________________________________________________________________________");
+                    String description = "";
+                    int dCount = 0;
+                    for (Text text : contentTexts) {
+                        if (dCount == 5) break;
+                        description += text;
+                        dCount++;
 
+                    }
+                    source.put("description", description);
+                }
+                results.add(source);
             }
+            long totalHits = response.getHits().getTotalHits();
+            long took = response.getTook().millis();
+            document.setTook(took);
+            document.setTotalHits(totalHits);
+            document.setJsonResult(JSON.toJSONString(results));
+            return document;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -332,34 +359,36 @@ public class ElasticSearchTemplate {
     }
 
     public static void main(String[] args) {
-//        ElasticSearchTemplate util = new ElasticSearchTemplate();
+        ElasticSearchTemplate util = new ElasticSearchTemplate();
 //        util.searchArticleByHighLight("angularjs路由");
-//        util.createIndex("blog","article",ITArticle.class);
+        util.createIndex("blog","article",ITArticle.class);
 
 
-        int total = 2015;
-        int currentPage =10;
-        int pageSize = 10;
-        int pageTotal = total / pageSize;
-        int firstPage = 1;
-        int lastPage = pageSize > pageTotal ? pageTotal : pageSize;
-        if (currentPage <= 0) {
-            throw new RuntimeException("当前页不能小于等于0");
-        }
-        if (currentPage - 7 >= 0) {
-            firstPage = (currentPage - 7) + 2;
-            lastPage = (currentPage - 6) + lastPage;
-        }
-
-        System.out.println("当前页一共" + pageTotal +"页");
-        if (currentPage > 1) {
-            System.out.print("上一页");
-        }
-        for (int i=firstPage;i<=lastPage;i++) {
-            System.out.print("\t"+i);
-        }
-        if (lastPage<pageTotal) {
-            System.out.print("下一页");
-        }
+//        int total = 2015;
+//        int currentPage = 10;
+//        int pageSize = 10;
+//        int pageTotal = total / pageSize;
+//        int firstPage = 1;
+//        int lastPage = pageSize > pageTotal ? pageTotal : pageSize;
+//        if (currentPage <= 0) {
+//            throw new RuntimeException("当前页不能小于等于0");
+//        }
+//        if (currentPage - 7 >= 0) {
+//            firstPage = (currentPage - 7) + 2;
+//            lastPage = (currentPage - 6) + lastPage;
+//        }
+//
+//        System.out.println("当前页一共" + pageTotal + "页");
+//        if (currentPage > 1) {
+//            System.out.print("上一页");
+//        }
+//        for (int i = firstPage; i <= lastPage; i++) {
+//            System.out.print("\t" + i);
+//        }
+//        if (lastPage < pageTotal) {
+//            System.out.print("下一页");
+//        }
+//        ElasticSearchTemplate util = new ElasticSearchTemplate();
+//        util.searchDocumentByTerm("blog", "article", "content", "java", 0, 10);
     }
 }

@@ -1,6 +1,7 @@
 package com.water.es.db.service;
 
 import com.water.es.db.entry.ITArticle;
+import com.water.es.entry.ESDocument;
 
 /**
  * Created by zhangmiaojie on 2017/3/2.
@@ -20,7 +21,7 @@ public interface ArticleService {
      * @param size  条目数量
      * @return      json格式数据
      */
-    String searchArticleByTerm(String field, String value, int from, int size);
+    ESDocument searchArticleByTerm(String field, String value, int from, int size);
 
     /**
      *
@@ -30,5 +31,5 @@ public interface ArticleService {
      * @param size  条目数量
      * @return      json格式数据
      */
-    String searchArticleByMatch(String field, String value, int from, int size);
+    ESDocument searchArticleByMatch(String field, String value, int from, int size);
 }
