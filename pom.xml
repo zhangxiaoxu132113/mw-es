@@ -16,9 +16,6 @@
     <profiles>
         <profile>
             <id>dev</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <active.profile>dev</active.profile>
             </properties>
@@ -34,10 +31,16 @@
             <properties>
                 <active.profile>product</active.profile>
             </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
         </profile>
     </profiles>
 
     <build>
+        <filters>
+            <filter>config_filters/${active.profile}/config-${active.profile}.properties</filter>
+        </filters>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

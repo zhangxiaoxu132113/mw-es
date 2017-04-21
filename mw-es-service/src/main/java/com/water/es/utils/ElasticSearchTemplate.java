@@ -47,7 +47,7 @@ public class ElasticSearchTemplate {
             Settings settings = Settings.builder().put("cluster.name", "my-application").build();
             //创建client
             client = new PreBuiltTransportClient(settings)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("119.23.71.245"), 9300));
         } catch (Exception e) {
             logger.error(e);
         }
@@ -356,39 +356,5 @@ public class ElasticSearchTemplate {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public static void main(String[] args) {
-        ElasticSearchTemplate util = new ElasticSearchTemplate();
-//        util.searchArticleByHighLight("angularjs路由");
-        util.createIndex("blog","article",ITArticle.class);
-
-
-//        int total = 2015;
-//        int currentPage = 10;
-//        int pageSize = 10;
-//        int pageTotal = total / pageSize;
-//        int firstPage = 1;
-//        int lastPage = pageSize > pageTotal ? pageTotal : pageSize;
-//        if (currentPage <= 0) {
-//            throw new RuntimeException("当前页不能小于等于0");
-//        }
-//        if (currentPage - 7 >= 0) {
-//            firstPage = (currentPage - 7) + 2;
-//            lastPage = (currentPage - 6) + lastPage;
-//        }
-//
-//        System.out.println("当前页一共" + pageTotal + "页");
-//        if (currentPage > 1) {
-//            System.out.print("上一页");
-//        }
-//        for (int i = firstPage; i <= lastPage; i++) {
-//            System.out.print("\t" + i);
-//        }
-//        if (lastPage < pageTotal) {
-//            System.out.print("下一页");
-//        }
-//        ElasticSearchTemplate util = new ElasticSearchTemplate();
-//        util.searchDocumentByTerm("blog", "article", "content", "java", 0, 10);
     }
 }

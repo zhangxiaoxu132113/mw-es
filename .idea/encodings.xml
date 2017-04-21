@@ -6,9 +6,6 @@
     <file url="file://$PROJECT_DIR$/config_filters/test" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mw-es-api/src/main/java/com/water/es/entry/ITArticle.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mw-es-api/src/main/java/com/water/es/entry/ITArticleCriteria.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/mw-es-service/config_filters/dev" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/mw-es-service/config_filters/product" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/mw-es-service/config_filters/test" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mw-es-service/src/main/java/com/water/es/db/entry/ITArticle.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mw-es-service/src/main/java/com/water/es/db/entry/ITArticleCriteria.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/mw-es-service/src/main/java/com/water/es/entry/ITArticle.java" charset="UTF-8" />
