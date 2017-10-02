@@ -1,11 +1,17 @@
 package com.water.es.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.water.es.annotation.EsMapping;
 import com.water.es.entry.ESDocument;
 import com.water.es.entry.ITArticle;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -23,11 +29,14 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,6 +83,12 @@ public class ElasticSearchTemplate {
      * @return boolean
      */
     public boolean createIndex(String index, String type, Class cls) {
+        if (isExistsIndex(index)) {
+            deleteIndex(index);
+            logger.info("删除索引:" + index+ ",成功！");
+        }
+        client.admin().indices()
+                .prepareCreate(index).execute().actionGet();
         XContentBuilder xContentBuilder = createIKMapping(cls);
         client.admin().indices()
                 .preparePutMapping(index)
@@ -81,10 +96,22 @@ public class ElasticSearchTemplate {
                 .setSource(xContentBuilder)
                 .execute()
                 .actionGet();
-
+        logger.info("成功创建索引：" + index);
         return false;
     }
 
+    public boolean isExistsIndex(String indexName){
+        IndicesExistsResponse response = client.admin().indices().exists(
+                        new IndicesExistsRequest().indices(new String[]{indexName})).actionGet();
+        return response.isExists();
+    }
+
+    public boolean deleteIndex(String indexName) {
+        client.admin().indices().prepareDelete(indexName)
+                .execute().actionGet();
+
+        return true;
+    }
     /**
      * 根据对象创建索引文档
      *
@@ -197,11 +224,20 @@ public class ElasticSearchTemplate {
      * 但如果要查询一个（ analyzed ）已分析的全文字段， 它们会先将查询字符串传递到一个合适的分析器，然后生成一个供查询的词项列表。
      */
     public ESDocument matchQueryBuilder(String index, String type, String key, String value, int from, int size) {
+        return matchQueryBuilder(index, type, key, value, null, from, size);
+    }
+
+    public ESDocument matchQueryBuilder(String index, String type, String key, String value, String[] searchFields, int from, int size) {
         ESDocument document = new ESDocument();
         MatchQueryBuilder queryBuilder = QueryBuilders.matchQuery(key, value);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        FetchSourceContext sourceContext = new FetchSourceContext(true, searchFields, searchFields);
+        sourceBuilder.fetchSource(sourceContext);
+
         SearchResponse searchResponse = client.prepareSearch(index)
                 .setTypes(type)
                 .setQuery(queryBuilder)
+                .setSource(sourceBuilder)
                 .setFrom(from)
                 .setSize(size)
                 .execute()
@@ -224,17 +260,26 @@ public class ElasticSearchTemplate {
         return document;
     }
 
+    public ESDocument searchDocumentByTerm(String index, String type, String queryField, String queryValue, int from, int size) {
+        return searchDocumentByTerm(index, type,queryField, queryValue, null, null, from, size);
+    }
+
     /**
      * 搜索文档 (精确搜索)
      * 它不会对词的多样性进行处理（如， foo 或 FOO ）
      */
-    public ESDocument searchDocumentByTerm(String index, String type, String queryField, String queryValue, int from, int size) {
+    public ESDocument searchDocumentByTerm(String index, String type, String queryField, String queryValue, String[] includes, String[] excludes, int from, int size) {
         ESDocument document = new ESDocument();
         QueryBuilder queryBuilder = new TermQueryBuilder(queryField, queryValue);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        FetchSourceContext sourceContext = new FetchSourceContext(true, includes, excludes);
+        sourceBuilder.fetchSource(sourceContext);
+
         SearchResponse searchResponse = client.prepareSearch(index)
                 .setTypes(type)
                 .setQuery(queryBuilder)
                 .setFrom(from)
+                .setSource(sourceBuilder)
                 .setSize(size)
                 .setExplain(true)
                 .execute()
@@ -356,5 +401,27 @@ public class ElasticSearchTemplate {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private static List<ITArticle> getArticlesByJson(String json) {
+        List<ITArticle> articles = null;
+        if (StringUtils.isNotBlank(json)) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<List<ITArticle>>() {
+            }.getType();
+            articles = gson.fromJson(json, type);
+        }
+        return articles;
+    }
+    public static void main(String[] args) {
+        ElasticSearchTemplate template = new ElasticSearchTemplate();
+//        template.deleteIndex(Constants.ES_CONFIG.INDEX_BLOG);
+//        template.createIndex(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, ITArticle.class);
+        String[] searchField = {"id", "title", "createOn"};
+        ESDocument document = template.searchDocumentByTerm(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
+                "content","java",null, new String[] {"content"}, 0,10);
+        List<ITArticle> articleList = getArticlesByJson(document.getJsonResult());
+        document.setResult(articleList);
+        System.out.println(document.getTook());
     }
 }

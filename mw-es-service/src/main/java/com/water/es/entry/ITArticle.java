@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public class ITArticle implements Serializable {
     @EsMapping(isAnalyzer = false)
-    private String id;
+    private Integer id;
 
     @EsMapping(isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String title;
@@ -39,12 +39,12 @@ public class ITArticle implements Serializable {
     @EsMapping(isMapping = false)
     private static final long serialVersionUID = 1L;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getTitle() {

@@ -27,15 +27,17 @@ public class ArticleServiceImpl implements IArticleService {
 
     @Override
     public void addArticle(ITArticle article) {
-        if (article == null || StringUtils.isBlank(article.getId())) {
+        if (article == null) {
             throw new RuntimeException("参数不合法！");
         }
-        elasticSearchTemplate.addDocument(JSONObject.toJSONString(article), Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, article.getId());
+        elasticSearchTemplate.addDocument(JSONObject.toJSONString(article), Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, String.valueOf(article.getId()));
     }
 
     @Override
     public ESDocument searchArticleByTerm(String field, String value, int from, int size) {
-        ESDocument document = elasticSearchTemplate.searchDocumentByTerm(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, field, value, from, size);
+        String[] searchField = {"id", "title", "createOn"};
+        ESDocument document = elasticSearchTemplate.searchDocumentByTerm(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
+                field, value, searchField, null, from, size);
         List<ITArticle> articleList = this.getArticlesByJson(document.getJsonResult());
         document.setResult(articleList);
         return document;
@@ -43,8 +45,10 @@ public class ArticleServiceImpl implements IArticleService {
 
     @Override
     public ESDocument searchArticleByMatch(String field, String value, int from, int size) {
-        ESDocument document = elasticSearchTemplate.matchQueryBuilder(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, field, value, from, size);
-        List<ITArticle> articleList = articleList = this.getArticlesByJson(document.getJsonResult());
+        String[] searchField = {"id", "title", "createOn"};
+        ESDocument document = elasticSearchTemplate.matchQueryBuilder(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
+                field, value, searchField, from, size);
+        List<ITArticle> articleList = this.getArticlesByJson(document.getJsonResult());
         document.setResult(articleList);
         return document;
     }
@@ -52,7 +56,7 @@ public class ArticleServiceImpl implements IArticleService {
     @Override
     public ESDocument searchArticleByMatchWithHighLight(String[] field, String value, int from, int size) {
         ESDocument document = elasticSearchTemplate.searchArticleByHighLight(Constants.ES_CONFIG.INDEX_BLOG, new String[]{Constants.ES_CONFIG.TYPE_ITARTICLE}, field, value, from, size);
-        List<ITArticle> articleList = articleList = this.getArticlesByJson(document.getJsonResult());
+        List<ITArticle> articleList = this.getArticlesByJson(document.getJsonResult());
         document.setResult(articleList);
         return document;
     }
