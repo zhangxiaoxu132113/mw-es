@@ -224,25 +224,20 @@ public class ElasticSearchTemplate {
      * 但如果要查询一个（ analyzed ）已分析的全文字段， 它们会先将查询字符串传递到一个合适的分析器，然后生成一个供查询的词项列表。
      */
     public ESDocument matchQueryBuilder(String index, String type, String key, String value, int from, int size) {
-        return matchQueryBuilder(index, type, key, value, null, from, size);
+        return matchQueryBuilder(index, type, key, value, null, null, from, size);
     }
 
-    public ESDocument matchQueryBuilder(String index, String type, String key, String value, String[] searchFields, int from, int size) {
+    public ESDocument matchQueryBuilder(String index, String type, String key, String value, String[] includes, String[] excludes, int from, int size) {
         ESDocument document = new ESDocument();
         MatchQueryBuilder queryBuilder = QueryBuilders.matchQuery(key, value);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        FetchSourceContext sourceContext = new FetchSourceContext(true, searchFields, searchFields);
-        sourceBuilder.fetchSource(sourceContext);
-
         SearchResponse searchResponse = client.prepareSearch(index)
                 .setTypes(type)
                 .setQuery(queryBuilder)
-                .setSource(sourceBuilder)
+                .setFetchSource(includes, excludes)
                 .setFrom(from)
                 .setSize(size)
                 .execute()
                 .actionGet();
-
         SearchHits searchHit = searchResponse.getHits();
         Map<String, Object> sources;
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
@@ -271,15 +266,11 @@ public class ElasticSearchTemplate {
     public ESDocument searchDocumentByTerm(String index, String type, String queryField, String queryValue, String[] includes, String[] excludes, int from, int size) {
         ESDocument document = new ESDocument();
         QueryBuilder queryBuilder = new TermQueryBuilder(queryField, queryValue);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        FetchSourceContext sourceContext = new FetchSourceContext(true, includes, excludes);
-        sourceBuilder.fetchSource(sourceContext);
-
         SearchResponse searchResponse = client.prepareSearch(index)
                 .setTypes(type)
                 .setQuery(queryBuilder)
                 .setFrom(from)
-                .setSource(sourceBuilder)
+                .setFetchSource(includes, excludes)
                 .setSize(size)
                 .setExplain(true)
                 .execute()
@@ -418,8 +409,8 @@ public class ElasticSearchTemplate {
 //        template.deleteIndex(Constants.ES_CONFIG.INDEX_BLOG);
 //        template.createIndex(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, ITArticle.class);
         String[] searchField = {"id", "title", "createOn"};
-        ESDocument document = template.searchDocumentByTerm(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
-                "content","java",null, new String[] {"content"}, 0,10);
+        ESDocument document = template.matchQueryBuilder(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
+                "content","Hbase 设计与开发实战", new String[] {"id", "title", "createOn"}, null, 0,10);
         List<ITArticle> articleList = getArticlesByJson(document.getJsonResult());
         document.setResult(articleList);
         System.out.println(document.getTook());

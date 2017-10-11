@@ -47,8 +47,8 @@ public class ArticleServiceImpl implements IArticleService {
     public ESDocument searchArticleByMatch(String field, String value, int from, int size) {
         String[] searchField = {"id", "title", "createOn"};
         ESDocument document = elasticSearchTemplate.matchQueryBuilder(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
-                field, value, searchField, from, size);
-        List<ITArticle> articleList = this.getArticlesByJson(document.getJsonResult());
+                field, value, searchField, null, from, size);
+        List<ITArticle> articleList = this .getArticlesByJson(document.getJsonResult());
         document.setResult(articleList);
         return document;
     }
