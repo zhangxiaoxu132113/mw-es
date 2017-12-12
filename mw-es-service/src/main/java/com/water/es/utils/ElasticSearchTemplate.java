@@ -1,6 +1,7 @@
 package com.water.es.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.water.es.annotation.EsMapping;
@@ -53,10 +54,10 @@ public class ElasticSearchTemplate {
 
     public ElasticSearchTemplate() {
         try {
-            Settings settings = Settings.builder().put("cluster.name", "my-application").build();
+            Settings settings = Settings.builder().put("cluster.name", "uubook-es-cluster").build();
             //创建client
             client = new PreBuiltTransportClient(settings)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("119.23.71.245"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("118.31.33.195"), 9300));
         } catch (Exception e) {
             logger.error(e);
         }
@@ -122,7 +123,9 @@ public class ElasticSearchTemplate {
         XContentBuilder xContentBuilder = null;
         try {
             xContentBuilder = XContentFactory.jsonBuilder();
-            xContentBuilder.startObject().startObject("properties");
+            xContentBuilder.startObject().startObject("_source").field("enabled", true).endObject();
+            xContentBuilder.startObject("_all").field("enabled", true).field("store", false).endObject();
+            xContentBuilder.startObject("properties");
             for (Field field : cls.getDeclaredFields()) {
                 EsMapping annotation = field.getAnnotation(EsMapping.class);
                 if (annotation.isMapping()) {
@@ -135,8 +138,6 @@ public class ElasticSearchTemplate {
 
                     if (annotation.isStore()) { //判断是否存储
                         xContentBuilder = xContentBuilder.field("store", "yes");
-                    } else {
-                        xContentBuilder = xContentBuilder.field("store", "no");
                     }
                     xContentBuilder.endObject();
                 }
@@ -279,6 +280,8 @@ public class ElasticSearchTemplate {
         Map<String, Object> sources;
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
         if (searchHit.totalHits() > 0) {
+
+
             for (SearchHit hit : searchHit.getHits()) {
                 sources = hit.getSource();
                 results.add(sources);
@@ -410,9 +413,18 @@ public class ElasticSearchTemplate {
 //        template.createIndex(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, ITArticle.class);
         String[] searchField = {"id", "title", "createOn"};
         ESDocument document = template.matchQueryBuilder(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
-                "content","Hbase 设计与开发实战", new String[] {"id", "title", "createOn"}, null, 0,10);
+                "content","快乐阿拉蕾", new String[] {"id", "title", "createOn"}, null, 0,10);
         List<ITArticle> articleList = getArticlesByJson(document.getJsonResult());
         document.setResult(articleList);
         System.out.println(document.getTook());
+
+//        ITArticle article = new ITArticle();
+//        article.setId(12334);
+//        article.setTitle("ElasticSearch——setting部分不存储某个字段");
+//        article.setAuthor("zhang");
+//        article.setCategory("123");
+//        article.setCreateOn(System.currentTimeMillis());
+//        article.setContent("该属性的取值可以为yes和no，用于指定字段的原始属性是否存入索引。默认值是no.意味着不能在结果中返回字段的原始值（即使没有存储原始值，也可以使用Soure字段返回原始值）。如果已经建立索引可以搜索该字段的内容。");
+//        template.addDocument(JSONObject.toJSONString(article), Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, String.valueOf(article.getId()));
     }
 }

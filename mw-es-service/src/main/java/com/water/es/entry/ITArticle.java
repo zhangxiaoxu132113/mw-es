@@ -9,29 +9,23 @@ public class ITArticle implements Serializable {
     @EsMapping(isAnalyzer = false)
     private Integer id;
 
-    @EsMapping(isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
+    @EsMapping(indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String title;
 
-    @EsMapping(isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
+    @EsMapping(isStore = false, isAnalyzer = false)
     private String description;
 
-    @EsMapping(isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
+    @EsMapping(isAnalyzer = false, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String author;
 
-    @EsMapping(isStore = false, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
+    @EsMapping(isStore = false, isAnalyzer = true, indexAnalyzer = Constants.Analyzer.IK_SMART, searchAnalyzer = Constants.Analyzer.IK_SMART)
     private String content;
 
     @EsMapping(isAnalyzer = false)
     private String category;
 
     @EsMapping(isAnalyzer = false)
-    private String reference;
-
-    @EsMapping(isAnalyzer = false)
     private String descryptUrl;
-
-    @EsMapping(isAnalyzer = false)
-    private String releaseTime;
 
     @EsMapping(isAnalyzer = false)
     private Long createOn;
@@ -79,14 +73,6 @@ public class ITArticle implements Serializable {
         this.category = category == null ? null : category.trim();
     }
 
-    public String getReference() {
-        return reference;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference == null ? null : reference.trim();
-    }
-
     public String getDescryptUrl() {
         return descryptUrl;
     }
@@ -95,13 +81,6 @@ public class ITArticle implements Serializable {
         this.descryptUrl = descryptUrl == null ? null : descryptUrl.trim();
     }
 
-    public String getReleaseTime() {
-        return releaseTime;
-    }
-
-    public void setReleaseTime(String releaseTime) {
-        this.releaseTime = releaseTime == null ? null : releaseTime.trim();
-    }
 
     public Long getCreateOn() {
         return createOn;
