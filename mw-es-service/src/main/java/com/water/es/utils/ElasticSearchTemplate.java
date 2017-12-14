@@ -123,9 +123,9 @@ public class ElasticSearchTemplate {
         XContentBuilder xContentBuilder = null;
         try {
             xContentBuilder = XContentFactory.jsonBuilder();
-            xContentBuilder.startObject().startObject("_source").field("enabled", true).endObject();
-            xContentBuilder.startObject("_all").field("enabled", true).field("store", false).endObject();
-            xContentBuilder.startObject("properties");
+//            xContentBuilder.startObject().startObject("_source").field("enabled", true).endObject();
+//            xContentBuilder.startObject("_all").field("enabled", true).field("store", false).endObject();
+            xContentBuilder.startObject().startObject("properties");
             for (Field field : cls.getDeclaredFields()) {
                 EsMapping annotation = field.getAnnotation(EsMapping.class);
                 if (annotation.isMapping()) {
@@ -413,7 +413,7 @@ public class ElasticSearchTemplate {
 //        template.createIndex(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE, ITArticle.class);
         String[] searchField = {"id", "title", "createOn"};
         ESDocument document = template.matchQueryBuilder(Constants.ES_CONFIG.INDEX_BLOG, Constants.ES_CONFIG.TYPE_ITARTICLE,
-                "content","快乐阿拉蕾", new String[] {"id", "title", "createOn"}, null, 0,10);
+                "content","java", new String[] {"id", "title", "createOn"}, null, 0,10);
         List<ITArticle> articleList = getArticlesByJson(document.getJsonResult());
         document.setResult(articleList);
         System.out.println(document.getTook());
